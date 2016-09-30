@@ -1,0 +1,2 @@
+include ':app', ':ble'
+project(':ble').projectDir = new File('../../tactosy/ble')
