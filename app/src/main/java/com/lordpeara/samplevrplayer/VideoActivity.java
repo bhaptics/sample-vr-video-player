@@ -23,8 +23,7 @@ public class VideoActivity extends GVRActivity {
 
     public static final String EXTRA_FILE_NAME = "com.bhaptics.vr.VideoActivity.EXTRA_FILE_NAME";
 
-    private GVRVideoSceneObjectPlayer<MediaPlayer> videoSceneObjectPlayer;
-    private static MediaPlayer sMediaPlayer;
+    private GVRVideoSceneObjectPlayer<MediaPlayer> mVideoSceneObjectPlayer;
 
     /**
      * Called when the activity is first created.
@@ -36,7 +35,7 @@ public class VideoActivity extends GVRActivity {
         Intent intent = getIntent();
         String videoPath = intent.getStringExtra(EXTRA_FILE_NAME);
 
-        videoSceneObjectPlayer = makeMediaPlayer(this, videoPath);
+        mVideoSceneObjectPlayer = makeMediaPlayer(this, videoPath);
 
         String splt[] = videoPath.split("\\.");
         String ext = "." + splt[splt.length-1];
@@ -55,49 +54,55 @@ public class VideoActivity extends GVRActivity {
 
             FeedbackWrapper wrapper = gson.fromJson(reader, type);
 
-            main = new VideoSceneGVRMain(videoSceneObjectPlayer, wrapper);
+            main = new VideoSceneGVRMain(mVideoSceneObjectPlayer, wrapper);
 
         } catch (FileNotFoundException e) {
-            main = new VideoSceneGVRMain(videoSceneObjectPlayer);
+            main = new VideoSceneGVRMain(mVideoSceneObjectPlayer);
             e.printStackTrace();
         }
 
-        if (videoSceneObjectPlayer != null) {
+        if (mVideoSceneObjectPlayer != null) {
             setMain(main, "settings.xml");
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (null != videoSceneObjectPlayer) {
-            final Object player = videoSceneObjectPlayer.getPlayer();
-            MediaPlayer mediaPlayer = (MediaPlayer) player;
-            mediaPlayer.pause();
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (null != videoSceneObjectPlayer) {
-            final Object player = videoSceneObjectPlayer.getPlayer();
-
+        if (mVideoSceneObjectPlayer != null) {
+            final Object player = mVideoSceneObjectPlayer.getPlayer();
             MediaPlayer mediaPlayer = (MediaPlayer) player;
             mediaPlayer.start();
         }
     }
 
-    private static GVRVideoSceneObjectPlayer<MediaPlayer> makeMediaPlayer(Activity context, String path) {
-        if (sMediaPlayer != null) {
-            return GVRVideoSceneObject.makePlayerInstance(sMediaPlayer);
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mVideoSceneObjectPlayer != null) {
+            final Object player = mVideoSceneObjectPlayer.getPlayer();
+            MediaPlayer mediaPlayer = (MediaPlayer) player;
+            mediaPlayer.pause();
         }
+    }
 
-        sMediaPlayer = new MediaPlayer();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
 
-        sMediaPlayer.setLooping(false);
+        if (mVideoSceneObjectPlayer != null) {
+            final Object player = mVideoSceneObjectPlayer.getPlayer();
+            MediaPlayer mediaPlayer = (MediaPlayer) player;
+            mediaPlayer.release();
+        }
+    }
 
-        sMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+    private static GVRVideoSceneObjectPlayer<MediaPlayer> makeMediaPlayer(Activity context, String path) {
+        MediaPlayer mediaPlayer = new MediaPlayer();
+
+        mediaPlayer.setLooping(false);
+
+        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mediaPlayer) {
                 mediaPlayer.start();
@@ -105,14 +110,14 @@ public class VideoActivity extends GVRActivity {
         });
 
         try {
-            sMediaPlayer.setDataSource(path);
-            sMediaPlayer.prepare();
+            mediaPlayer.setDataSource(path);
+            mediaPlayer.prepare();
         } catch (IOException e) {
             e.printStackTrace();
             context.finish();
             return null;
         }
 
-        return GVRVideoSceneObject.makePlayerInstance(sMediaPlayer);
+        return GVRVideoSceneObject.makePlayerInstance(mediaPlayer);
     }
 }
