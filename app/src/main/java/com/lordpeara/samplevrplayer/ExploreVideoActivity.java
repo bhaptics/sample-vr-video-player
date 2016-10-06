@@ -7,6 +7,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
+import com.bhaptics.ble.core.TactosyManager;
+import com.lordpeara.samplevrplayer.models.OnConnectListener;
 import com.lordpeara.samplevrplayer.ui.ExploreVideoGVRMain;
 import com.lordpeara.samplevrplayer.ui.VideoScene;
 
@@ -21,6 +23,7 @@ public class ExploreVideoActivity extends GVRActivity {
         super.onCreate(icicle);
         setMain(mGVRMain, "settings.xml");
         Log.e(TAG, "onCreate");
+        TactosyManager.getInstance().addConnectCallback(new OnConnectListener());
     }
 
     @Override

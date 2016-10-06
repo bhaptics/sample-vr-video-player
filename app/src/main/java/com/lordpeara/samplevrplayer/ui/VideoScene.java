@@ -8,8 +8,10 @@ import com.bhaptics.ble.util.Constants;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
+import com.lordpeara.samplevrplayer.models.DeviceWrapper;
 import com.lordpeara.samplevrplayer.models.Feedback;
 import com.lordpeara.samplevrplayer.models.FeedbackWrapper;
+import com.lordpeara.samplevrplayer.models.OnConnectListener;
 
 import org.gearvrf.GVRContext;
 import org.gearvrf.GVRMesh;
@@ -33,7 +35,6 @@ public class VideoScene extends GVRScene {
     private static final byte[] EMPTY_BYTES = new byte[20];
 
     private Map<String, List<Feedback>> mFeedbacks = null;
-    private List<DeviceWrapper> mDevices = new ArrayList<>();
 
     private GVRVideoSceneObjectPlayer<MediaPlayer> mGVRPlayer;
     private MediaPlayer mPlayer;
@@ -68,11 +69,6 @@ public class VideoScene extends GVRScene {
         getMainCameraRig().getTransform().setPosition(0.0f, 0.0f, 0.0f);
 
         mPlayer = null;
-
-        List<Device> devices = TactosyManager.getInstance().getConnectedDevices();
-        for (int i = 0; i < devices.size(); i++) {
-            mDevices.add(new DeviceWrapper(devices.get(i), i % 2));
-        }
 
         loadVideo(video);
     }
@@ -131,7 +127,7 @@ public class VideoScene extends GVRScene {
         }
 
         if (feedbacks == null || feedbacks.size() == 0) {
-            for (DeviceWrapper device: mDevices) {
+            for (DeviceWrapper device: OnConnectListener.getDevices()) {
                 TactosyManager.getInstance().setMotor(device.device.getMacAddress(), EMPTY_BYTES);
             }
             return;
@@ -144,7 +140,7 @@ public class VideoScene extends GVRScene {
             UUID charUuid = f.mType.equals("DOT_MODE") ?
                     Constants.MOTOR_CHAR : Constants.MOTOR_CHAR_MAPP;
 
-            for (DeviceWrapper device: mDevices) {
+            for (DeviceWrapper device: OnConnectListener.getDevices()) {
                 if (pos == device.position) {
                     TactosyManager.getInstance()
                             .setMotor(device.device.getMacAddress(), f.mValues, charUuid);
@@ -156,20 +152,6 @@ public class VideoScene extends GVRScene {
     public void destroy() {
         if (mPlayer != null) {
             mPlayer.release();
-        }
-    }
-
-    class DeviceWrapper {
-        public static final int POSITION_BOTH = -1;
-        public static final int POSITION_LEFT = 0;
-        public static final int POSITION_RIGHT = 1;
-
-        public Device device;
-        public int position;
-
-        public DeviceWrapper(Device device, int position) {
-            this.device = device;
-            this.position = position;
         }
     }
 }
