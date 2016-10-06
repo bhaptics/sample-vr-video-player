@@ -1,7 +1,6 @@
 package com.lordpeara.samplevrplayer.ui;
 
 import android.media.MediaPlayer;
-import android.provider.MediaStore;
 
 import com.bhaptics.ble.core.TactosyManager;
 import com.bhaptics.ble.model.Device;
@@ -126,7 +125,6 @@ public class VideoScene extends GVRScene {
         int cur = mPlayer.getCurrentPosition();
         cur = cur / 20 * 20;
 
-        byte[] bytes;
         List<Feedback> feedbacks = null;
         if (mFeedbacks.containsKey(String.valueOf(cur))) {
             feedbacks = mFeedbacks.get(String.valueOf(cur));

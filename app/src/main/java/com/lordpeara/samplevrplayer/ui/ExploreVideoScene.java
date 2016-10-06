@@ -30,23 +30,21 @@ public class ExploreVideoScene extends GVRScene implements PickHandler {
         @Override
         public void onPick(GVRPicker picker) {
             GVRPicker.GVRPickedObject picked = picker.getPicked()[0];
+
+            if (mPickedObject != null && mPickedObject != picked.hitObject) {
+                mPickedObject.getRenderData().getMaterial().setOpacity(0.5f);
+            }
+
             mPickedObject = picked.hitObject;
 
-            int targetIdx = -1;
-            for (int i=0; i<mSceneObjects.size(); i++) {
-                if (mPickHandler.mPickedObject == mSceneObjects.get(i)) {
-                    targetIdx = i;
-                    break;
-                }
-            }
-
-            if (targetIdx != -1) {
-                Log.e(TAG, "pickedObject: " + mVideos.get(targetIdx).getAbsolutePath());
-            }
+            mPickedObject.getRenderData().getMaterial().setOpacity(1.0f);
         }
 
         @Override
         public void onNoPick(GVRPicker picker) {
+            if (mPickedObject != null) {
+                mPickedObject.getRenderData().getMaterial().setOpacity(0.5f);
+            }
             mPickedObject = null;
         }
 
@@ -63,7 +61,6 @@ public class ExploreVideoScene extends GVRScene implements PickHandler {
     private static final float THUMB_WIDTH = 2.0f;
     private static final float THUMB_HEIGHT = 2.0f;
 
-    // NOTE this is never used but should not be collected by gc.
     private GVRPicker mPicker;
 
     private VideoPickHandler mPickHandler;
@@ -108,7 +105,8 @@ public class ExploreVideoScene extends GVRScene implements PickHandler {
             float start = 1f - THUMB_WIDTH * (11 * videos.size() - 1) / 20;
 
             sceneObject.setPickingEnabled(true);
-            sceneObject.getTransform().setPosition(start + THUMB_WIDTH * i * 1.1f, 0.0f, -2.0f);
+            sceneObject.getRenderData().getMaterial().setOpacity(0.5f);
+            sceneObject.getTransform().setPosition(start + THUMB_WIDTH * i * 1.1f, 0.0f, -3.0f);
 
             mSceneObjects.add(sceneObject);
             mVideos.add(video);
