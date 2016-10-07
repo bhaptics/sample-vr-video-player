@@ -2,21 +2,16 @@ package com.lordpeara.samplevrplayer.models;
 
 import com.bhaptics.ble.core.TactosyManager;
 import com.bhaptics.ble.model.Device;
+import com.bhaptics.ble.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
-public class OnConnectListener implements TactosyManager.ConnectCallback {
+public class OnConnectListener implements TactosyManager.ConnectCallback, TactosyManager.DataCallback {
 
+    private static final int INDEX_POSITION = 2;
     private static List<DeviceWrapper> sDevices = new ArrayList<>();
-
-    private static final int INDEX_LED_COLOR = 2;
-
-    private static final byte[] DEFAULT_CONFIG = new byte[] {
-            0x64, 0x04, 0x00
-    };
-
-    private static int LAST_POSITION = DeviceWrapper.POSITION_LEFT;
 
     public static List<DeviceWrapper> getDevices() {
         return sDevices;
@@ -28,17 +23,12 @@ public class OnConnectListener implements TactosyManager.ConnectCallback {
 
         for (Device _device: unwrappedDevices) {
             if (_device.getMacAddress().equals(addr)) {
-                DeviceWrapper device = new DeviceWrapper(_device, LAST_POSITION);
-
-                LAST_POSITION = LAST_POSITION == DeviceWrapper.POSITION_RIGHT ?
-                        DeviceWrapper.POSITION_LEFT : DeviceWrapper.POSITION_RIGHT;
+                DeviceWrapper device = new DeviceWrapper(_device, DeviceWrapper.POSITION_BOTH);
 
                 sDevices.add(device);
 
-                byte[] config = DEFAULT_CONFIG.clone();
-                config[INDEX_LED_COLOR] = (byte) device.position;
-
-                TactosyManager.getInstance().setMotorConfig(_device.getMacAddress(), config);
+                TactosyManager.getInstance().getMotorConfig(_device.getMacAddress());
+                return;
             }
         }
     }
@@ -55,4 +45,23 @@ public class OnConnectListener implements TactosyManager.ConnectCallback {
 
     @Override
     public void onConnectionError(String addr) {}
+
+    @Override
+    public void onRead(String address, UUID charUUID, byte[] data, int status) {
+        if (!charUUID.equals(Constants.MOTOR_CONFIG_CUST)) {
+            return;
+        }
+
+        for (DeviceWrapper device: sDevices) {
+            if (device.device.getMacAddress().equals(address)) {
+                device.position = data[INDEX_POSITION];
+            }
+        }
+    }
+
+    @Override
+    public void onWrite(String address, UUID charUUID, int status) {}
+
+    @Override
+    public void onDataError(String address, String charId, int errCode) {}
 }
