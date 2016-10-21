@@ -1,6 +1,6 @@
 package com.lordpeara.samplevrplayer.models;
 
-import com.bhaptics.ble.core.TactosyManager;
+import com.bhaptics.ble.client.TactosyClient;
 import com.bhaptics.ble.model.Device;
 import com.bhaptics.ble.util.Constants;
 
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class OnConnectListener implements TactosyManager.ConnectCallback, TactosyManager.DataCallback {
+public class OnConnectListener implements TactosyClient.ConnectCallback, TactosyClient.DataCallback {
 
     private static final int INDEX_POSITION = 2;
     private static List<DeviceWrapper> sDevices = new ArrayList<>();
@@ -19,15 +19,15 @@ public class OnConnectListener implements TactosyManager.ConnectCallback, Tactos
 
     @Override
     public void onConnect(String addr) {
-        List<Device> unwrappedDevices = TactosyManager.getInstance().getConnectedDevices();
+        List<Device> unwrappedDevices = TactosyClient.getInstance(null).getConnectedDevices();
 
         for (Device _device: unwrappedDevices) {
-            if (_device.getMacAddress().equals(addr)) {
+            if (_device.getAddress().equals(addr)) {
                 DeviceWrapper device = new DeviceWrapper(_device, DeviceWrapper.POSITION_BOTH);
 
                 sDevices.add(device);
 
-                TactosyManager.getInstance().getMotorConfig(_device.getMacAddress());
+                TactosyClient.getInstance(null).getMotorConfig(_device.getAddress());
                 return;
             }
         }
@@ -36,7 +36,7 @@ public class OnConnectListener implements TactosyManager.ConnectCallback, Tactos
     @Override
     public void onDisconnect(String addr) {
         for (DeviceWrapper device: sDevices) {
-            if (device.device.getMacAddress().equals(addr)) {
+            if (device.device.getAddress().equals(addr)) {
                 sDevices.remove(device);
                 return;
             }
@@ -53,7 +53,7 @@ public class OnConnectListener implements TactosyManager.ConnectCallback, Tactos
         }
 
         for (DeviceWrapper device: sDevices) {
-            if (device.device.getMacAddress().equals(address)) {
+            if (device.device.getAddress().equals(address)) {
                 device.position = data[INDEX_POSITION];
             }
         }

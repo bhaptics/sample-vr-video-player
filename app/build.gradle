@@ -22,10 +22,11 @@ android {
 dependencies {
 //    compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile project(':ble')
 
     compile (name: 'framework-debug', ext: 'aar')
     compile (name: 'backend_oculus-debug', ext: 'aar')
+
+    compile 'com.bhaptics.tactosy:ble:0.9.4'
 }
 
 allprojects {

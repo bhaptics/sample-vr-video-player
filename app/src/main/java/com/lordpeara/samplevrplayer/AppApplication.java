@@ -2,7 +2,7 @@ package com.lordpeara.samplevrplayer;
 
 import android.app.Application;
 
-import com.bhaptics.ble.core.TactosyManager;
+import com.bhaptics.ble.client.TactosyClient;
 import com.lordpeara.samplevrplayer.models.OnConnectListener;
 
 public class AppApplication extends Application {
@@ -10,12 +10,11 @@ public class AppApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        TactosyManager.instantiate(this);
-        TactosyManager.getInstance().bindService();
+        TactosyClient.getInstance(this).bindService(this);
 
         OnConnectListener callback = new OnConnectListener();
 
-        TactosyManager.getInstance().addConnectCallback(callback);
-        TactosyManager.getInstance().addDataCallback(callback);
+        TactosyClient.getInstance(this).addConnectCallback(callback);
+        TactosyClient.getInstance(this).addDataCallback(callback);
     }
 }

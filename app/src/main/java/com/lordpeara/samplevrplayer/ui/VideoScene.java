@@ -2,8 +2,7 @@ package com.lordpeara.samplevrplayer.ui;
 
 import android.media.MediaPlayer;
 
-import com.bhaptics.ble.core.TactosyManager;
-import com.bhaptics.ble.model.Device;
+import com.bhaptics.ble.client.TactosyClient;
 import com.bhaptics.ble.util.Constants;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -25,7 +24,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -128,7 +126,7 @@ public class VideoScene extends GVRScene {
 
         if (feedbacks == null || feedbacks.size() == 0) {
             for (DeviceWrapper device: OnConnectListener.getDevices()) {
-                TactosyManager.getInstance().setMotor(device.device.getMacAddress(), EMPTY_BYTES);
+                TactosyClient.getInstance(null).setMotor(device.device.getAddress(), EMPTY_BYTES);
             }
             return;
         }
@@ -142,14 +140,19 @@ public class VideoScene extends GVRScene {
 
             for (DeviceWrapper device: OnConnectListener.getDevices()) {
                 if (pos == device.position) {
-                    TactosyManager.getInstance()
-                            .setMotor(device.device.getMacAddress(), f.mValues, charUuid);
+                    TactosyClient.getInstance(null)
+                            .setMotor(device.device.getAddress(), f.mValues, charUuid);
                 }
             }
         }
     }
 
     public void destroy() {
+        for (DeviceWrapper device: OnConnectListener.getDevices()) {
+            TactosyClient.getInstance(null)
+                    .setMotor(device.device.getAddress(), EMPTY_BYTES);
+        }
+
         if (mPlayer != null) {
             mPlayer.release();
         }
