@@ -26,7 +26,7 @@ dependencies {
     compile (name: 'framework-debug', ext: 'aar')
     compile (name: 'backend_oculus-debug', ext: 'aar')
 
-    compile 'com.bhaptics.tactosy:ble:0.9.4'
+    compile 'com.bhaptics.tactosy:ble:0.9.8'
 }
 
 allprojects {
