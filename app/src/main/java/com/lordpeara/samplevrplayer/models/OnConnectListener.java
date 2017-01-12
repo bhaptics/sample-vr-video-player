@@ -23,11 +23,14 @@ public class OnConnectListener implements TactosyClient.ConnectCallback, Tactosy
 
         for (Device _device: unwrappedDevices) {
             if (_device.getAddress().equals(addr)) {
-                DeviceWrapper device = new DeviceWrapper(_device, DeviceWrapper.POSITION_BOTH);
+                int position = sDevices.size() % 2 == 0 ? DeviceWrapper.POSITION_LEFT : DeviceWrapper.POSITION_RIGHT;
+                DeviceWrapper device = new DeviceWrapper(_device, position);
 
                 sDevices.add(device);
+                byte config[] = {100, 4, (byte) position};
+                TactosyClient.getInstance(null).setMotorConfig(_device.getAddress(), config);
 
-                TactosyClient.getInstance(null).getMotorConfig(_device.getAddress());
+//                TactosyClient.getInstance(null).getMotorConfig(_device.getAddress());
                 return;
             }
         }
