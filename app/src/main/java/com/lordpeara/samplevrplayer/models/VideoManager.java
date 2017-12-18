@@ -1,6 +1,7 @@
 package com.lordpeara.samplevrplayer.models;
 
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ public class VideoManager {
 
     public static List<File> getVideoList(String path) {
 
+
         String sdCardState = Environment.getExternalStorageState();
 
         if (!(sdCardState.equals(Environment.MEDIA_MOUNTED) ||
@@ -26,6 +28,7 @@ public class VideoManager {
 
             return EMPTY_LIST;
         }
+
 
         File root = Environment.getExternalStorageDirectory();
         File mediaDir = new File(root, path);
@@ -39,6 +42,7 @@ public class VideoManager {
         ArrayList<File> videoList = new ArrayList<>();
         for (File file: files) {
             if (file.getName().toLowerCase().endsWith(SUPPORTED_EXT)) {
+                Log.e("VideoManager",file.toString());
                 videoList.add(file);
             }
         }

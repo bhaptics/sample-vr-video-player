@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    buildToolsVersion '26.0.2'
 
     defaultConfig {
         applicationId "com.lordpeara.samplevrplayer"
@@ -10,12 +10,17 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "0.0.1"
+        multiDexEnabled true
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    dexOptions{
+        jumboMode = true
+        javaMaxHeapSize "4g"
     }
 }
 
@@ -26,7 +31,12 @@ dependencies {
     compile (name: 'framework-debug', ext: 'aar')
     compile (name: 'backend_oculus-debug', ext: 'aar')
 
-    compile 'com.bhaptics.tactosy:ble:0.9.8'
+    compile project(':ble')
+
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:multidex:1.0.0'
+
+
 }
 
 allprojects {

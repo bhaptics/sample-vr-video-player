@@ -1,6 +1,7 @@
 package com.lordpeara.samplevrplayer.ui;
 
 import android.media.MediaPlayer;
+import android.util.Log;
 
 import com.bhaptics.ble.client.TactosyClient;
 import com.bhaptics.ble.util.Constants;
@@ -36,6 +37,8 @@ public class VideoScene extends GVRScene {
 
     private GVRVideoSceneObjectPlayer<MediaPlayer> mGVRPlayer;
     private MediaPlayer mPlayer;
+
+    public static final String TAG = "VideoScene";
 
     public static GVRVideoSceneObjectPlayer<MediaPlayer> makeMediaPlayer(File video) {
         MediaPlayer mediaPlayer = new MediaPlayer();
@@ -132,11 +135,25 @@ public class VideoScene extends GVRScene {
         }
 
         for (Feedback f: feedbacks) {
-            int pos = f.mPosition.equals("Left") ?
-                    DeviceWrapper.POSITION_LEFT : DeviceWrapper.POSITION_RIGHT;
+            int pos = 0;
+            switch(f.mPosition.toLowerCase()) {
+                case "left" :
+                    pos = DeviceWrapper.POSITION_LEFT;
+                    break;
+                case "right" :
+                    pos = DeviceWrapper.POSITION_RIGHT;
+                    break;
+                case "vestfront" :
+                    pos = DeviceWrapper.VEST_FRONT;
+                    break;
+                case "vestback" :
+                    pos = DeviceWrapper.VEST_BACK;
+                    break;
+
+            }
 
             UUID charUuid = f.mType.equals("DOT_MODE") ?
-                    Constants.MOTOR_CHAR : Constants.MOTOR_CHAR_MAPP;
+                    Constants.MOTOR_CHAR : Constants.MOTOR_CHAR;
 
             for (DeviceWrapper device: OnConnectListener.getDevices()) {
                 if (pos == device.position) {
