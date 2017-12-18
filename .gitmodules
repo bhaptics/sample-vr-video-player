@@ -1,0 +1,3 @@
+[submodule "tactosy-ble"]
+	path = tactosy-ble
+	url = https://github.com/kwongiho/tactosy-ble
