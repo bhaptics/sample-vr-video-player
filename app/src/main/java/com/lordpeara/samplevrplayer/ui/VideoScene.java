@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -37,6 +38,8 @@ public class VideoScene extends GVRScene {
 
     private GVRVideoSceneObjectPlayer<MediaPlayer> mGVRPlayer;
     private MediaPlayer mPlayer;
+
+    List<Feedback> feedbackList;
 
     public static final String TAG = "VideoScene";
 
@@ -65,7 +68,7 @@ public class VideoScene extends GVRScene {
 
     public VideoScene(GVRContext gvrContext, File video) {
         super(gvrContext);
-
+        feedbackList = new ArrayList<>();
         // set up camerarig position (default)
         getMainCameraRig().getTransform().setPosition(0.0f, 0.0f, 0.0f);
 
@@ -80,7 +83,7 @@ public class VideoScene extends GVRScene {
         String splt[] = videoPath.split("\\.");
         String ext = "." + splt[splt.length-1];
 
-        String tactosyFilePath = videoPath.replace(ext, ".tactosy");
+        String tactosyFilePath = videoPath.replace(ext, ".tact");
 
         try {
             FileReader fReader = new FileReader(tactosyFilePath);
@@ -121,47 +124,29 @@ public class VideoScene extends GVRScene {
 
         int cur = mPlayer.getCurrentPosition();
         cur = cur / 20 * 20;
+        Log.e(TAG,"CUR : "+cur);
 
         List<Feedback> feedbacks = null;
         if (mFeedbacks.containsKey(String.valueOf(cur))) {
             feedbacks = mFeedbacks.get(String.valueOf(cur));
         }
 
-        if (feedbacks == null || feedbacks.size() == 0) {
-            for (DeviceWrapper device: OnConnectListener.getDevices()) {
-                TactosyClient.getInstance(null).setMotor(device.device.getAddress(), EMPTY_BYTES);
-            }
-            return;
-        }
 
         for (Feedback f: feedbacks) {
-            int pos = 0;
-            switch(f.mPosition.toLowerCase()) {
-                case "left" :
-                    pos = DeviceWrapper.POSITION_LEFT;
-                    break;
-                case "right" :
-                    pos = DeviceWrapper.POSITION_RIGHT;
-                    break;
-                case "vestfront" :
-                    pos = DeviceWrapper.VEST_FRONT;
-                    break;
-                case "vestback" :
-                    pos = DeviceWrapper.VEST_BACK;
-                    break;
+            StringBuilder sb = new StringBuilder();
+            for(int i=0; i< f.mValues.length; i++ )
+                sb.append(f.mValues[i]+" ");
+            Log.e(TAG, sb.toString());
 
-            }
+            feedbackList.add(f);
 
-            UUID charUuid = f.mType.equals("DOT_MODE") ?
-                    Constants.MOTOR_CHAR : Constants.MOTOR_CHAR;
 
-            for (DeviceWrapper device: OnConnectListener.getDevices()) {
-                if (pos == device.position) {
-                    TactosyClient.getInstance(null)
-                            .setMotor(device.device.getAddress(), f.mValues, charUuid);
-                }
-            }
         }
+        Log.e(TAG,feedbackList.toString());
+
+        TactosyClient.getInstance(null)
+                .setMotor(new Gson().toJson(feedbackList));
+        feedbackList.clear();
     }
 
     public void destroy() {
