@@ -3,15 +3,12 @@ package com.lordpeara.samplevrplayer.ui;
 import android.media.MediaPlayer;
 import android.util.Log;
 
-import com.bhaptics.ble.client.TactosyClient;
-import com.bhaptics.ble.util.Constants;
+import com.bhaptics.ble.client.HapticPlayer;
+import com.bhaptics.ble.model.Feedback;
+import com.bhaptics.ble.model.FeedbackWrapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
-import com.lordpeara.samplevrplayer.models.DeviceWrapper;
-import com.lordpeara.samplevrplayer.models.Feedback;
-import com.lordpeara.samplevrplayer.models.FeedbackWrapper;
-import com.lordpeara.samplevrplayer.models.OnConnectListener;
 
 import org.gearvrf.GVRContext;
 import org.gearvrf.GVRMesh;
@@ -28,18 +25,12 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class VideoScene extends GVRScene {
-
-    private static final byte[] EMPTY_BYTES = new byte[20];
-
     private Map<String, List<Feedback>> mFeedbacks = null;
 
     private GVRVideoSceneObjectPlayer<MediaPlayer> mGVRPlayer;
     private MediaPlayer mPlayer;
-
-    List<Feedback> feedbackList;
 
     public static final String TAG = "VideoScene";
 
@@ -68,8 +59,6 @@ public class VideoScene extends GVRScene {
 
     public VideoScene(GVRContext gvrContext, File video) {
         super(gvrContext);
-        feedbackList = new ArrayList<>();
-        // set up camerarig position (default)
         getMainCameraRig().getTransform().setPosition(0.0f, 0.0f, 0.0f);
 
         mPlayer = null;
@@ -124,37 +113,26 @@ public class VideoScene extends GVRScene {
 
         int cur = mPlayer.getCurrentPosition();
         cur = cur / 20 * 20;
-        Log.e(TAG,"CUR : "+cur);
+        Log.i(TAG,"CUR : " + cur);
 
         List<Feedback> feedbacks = null;
         if (mFeedbacks.containsKey(String.valueOf(cur))) {
             feedbacks = mFeedbacks.get(String.valueOf(cur));
         }
 
-
-        for (Feedback f: feedbacks) {
-            StringBuilder sb = new StringBuilder();
-            for(int i=0; i< f.mValues.length; i++ )
-                sb.append(f.mValues[i]+" ");
-            Log.e(TAG, sb.toString());
-
-            feedbackList.add(f);
-
-
+        if (feedbacks == null) {
+            return;
         }
-        Log.e(TAG,feedbackList.toString());
+        List<Feedback> feedbackList = new ArrayList<>();
+        for (Feedback f: feedbacks) {
+            feedbackList.add(f);
+        }
 
-        TactosyClient.getInstance(null)
-                .setMotor(new Gson().toJson(feedbackList));
-        feedbackList.clear();
+        HapticPlayer.getInstance(null).submit(feedbackList);
     }
 
     public void destroy() {
-        for (DeviceWrapper device: OnConnectListener.getDevices()) {
-            TactosyClient.getInstance(null)
-                    .setMotor(device.device.getAddress(), EMPTY_BYTES);
-        }
-
+        HapticPlayer.getInstance(null).turnOff();
         if (mPlayer != null) {
             mPlayer.release();
         }
